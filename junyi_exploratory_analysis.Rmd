@@ -1,0 +1,36 @@
+---
+title: "June Dataset Exploratory Analysis"
+author: "Joshua Gardner"
+date: "August 15, 2016"
+output: html_document
+---
+
+```{r}
+#setwd("~/Documents/Github/ibm-apache-spark-makers-build")
+library(plyr)
+library(dplyr)
+library(ggplot2)
+rd = read.table('/Users/joshgardner/Documents/Github/private/ds1275_tx_All_Data_2872_2015_0620_120619.txt'
+                , header = TRUE
+                , sep = '\t')
+
+#correct column data types
+
+pd <- rd %>%
+    mutate(Time = as.POSIXct(Time, format = "%Y-%m-%d %H:%M:%S")) %>%
+    mutate(Problem.Start.Time = as.POSIXct(Problem.Start.Time, format = "%Y-%m-%d %H:%M:%S")) %>%
+    mutate(Session.Id = factor(Session.Id)) %>%
+    mutate(Duration..sec. = as.numeric(as.character(Duration..sec.))) %>%
+    # EDM paper specifies data collection begins on 2012-11-05; filter out single observation outside that timeframe
+    filter(difftime(as.POSIXct("2012-11-05 00:00:00"), Problem.Start.Time) < 0 )
+#drop time zone column
+```
+
+```{r}
+ggplot(data = pd, aes(x = Problem.Start.Time)) + geom_density(fill = "dodgerblue", alpha = 0.2) + xlab("Problem Start Time") + ylab("Density") + ggtitle("Junyi Academy\nProblem Start Times")
+
+
+ggplot(data = pd, aes(x = KC..Area.)) + geom_bar() + coord_flip() + xlab("Topic Area") + ylab("Count of Log Entries") + ggtitle("Log Entries By Topic Area\nJunyi Academy")
+
+ggplot(data = pd, aes(x = KC..Topic.)) + geom_bar() + coord_flip() + xlab("Topic Area") + ylab("Count of Log Entries") + ggtitle("Log Entries By Topic\nJunyi Academy") + theme(axis.ticks.y = element_blank())
+```
